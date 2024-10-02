@@ -5,13 +5,19 @@ using UnityEngine;
 
 public class FlipperMovement : MonoBehaviour
 {
-    private HingeJoint2D _hingeJoint2D;
     [SerializeField] private String _keyName;
+    private HingeJoint2D _hingeJoint2D;
+    private JointMotor2D _defaultMotor;
+    private JointMotor2D _modifiedMotor;
 
     void Start()
     {
         _hingeJoint2D = GetComponent<HingeJoint2D>();
-        _hingeJoint2D.useMotor = false;
+        _defaultMotor = _hingeJoint2D.motor;
+        _modifiedMotor = _defaultMotor;
+        _modifiedMotor.motorSpeed = - _modifiedMotor.motorSpeed;
+
+        _hingeJoint2D.motor = _modifiedMotor;
     }
 
     void Update()
@@ -21,18 +27,11 @@ public class FlipperMovement : MonoBehaviour
         }
     }
 
-    void OnCollisionEnter2D(Collision2D collision) {
-        if (collision.gameObject.tag == "Ball") {
-            Debug.Log("Hit a ball! " + Time.realtimeSinceStartup);
-        }
-    }
-
     private void RotateUp()
     {
-        _hingeJoint2D.useMotor = true;
+        _hingeJoint2D.motor = _defaultMotor;
         StartCoroutine(RotateDown());
     }
-
 
     private IEnumerator RotateDown()
     {
@@ -44,6 +43,6 @@ public class FlipperMovement : MonoBehaviour
         {
             yield return new WaitUntil(() => _hingeJoint2D.limitState == JointLimitState2D.LowerLimit);
         }
-        _hingeJoint2D.useMotor = false;
+        _hingeJoint2D.motor = _modifiedMotor;
     }
 }

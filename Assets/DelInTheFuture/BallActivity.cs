@@ -1,42 +1,64 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class BallActivity : MonoBehaviour
 {
-    [SerializeField] private float rotationSpeed = 20.0f;
-    private Rigidbody2D rb;
+    [SerializeField] private float _rotationSpeed = 20.0f;
+    [SerializeField] private float _gravityForce = 10.0f;
+    private Rigidbody2D _rb;
+    private Vector3 _centralPosition;
 
     void Start()
     {
-        rb = GetComponent<Rigidbody2D>();
+        _rb = GetComponent<Rigidbody2D>();
+        
+        GameObject centralElement = GameObject.FindWithTag("CentralElement");
+        if (centralElement) {
+            _centralPosition = centralElement.transform.position;
+        } else {
+            _centralPosition = new Vector3();
+        }
     }
 
     void OnCollisionEnter2D(Collision2D collision) {
         if (collision.gameObject.tag == "Flipper") {
             Debug.Log("Hit a ball! " + Time.realtimeSinceStartup);
         }
-        if (collision.gameObject.name == "Floor") {
-            gameObject.transform.position = new Vector2(0,0);
+        if (collision.gameObject.name == "LeftBorder") {
+            gameObject.transform.position = _centralPosition;
+            GameManager.incrementLeftCounter();
+        } else if (collision.gameObject.name == "RightBorder") {
+            gameObject.transform.position = _centralPosition;
+            GameManager.incrementRightCounter();
         }
 
-        // Получаем нормаль столкновения
         Vector2 collisionNormal = collision.GetContact(0).normal;
-
-        // Определяем направление движения мяча
-        Vector2 ballVelocity = rb.velocity;
-
-        // Вычисляем угол между нормалью и вектором скорости
+        Vector2 ballVelocity = _rb.velocity;
         float angle = Vector2.SignedAngle(ballVelocity, collisionNormal);
 
-        // Если мяч катится вперед, придаем вращение
         if (angle > 0)
         {
-            rb.angularVelocity = -rotationSpeed; // Вращение в одну сторону
+            _rb.angularVelocity = -_rotationSpeed;
         }
         else
         {
-            rb.angularVelocity = rotationSpeed; // Вращение в другую сторону
+            _rb.angularVelocity = _rotationSpeed;
         }
+    }
+
+    void FixedUpdate() {
+        float force = 0.0f;
+        if (_centralPosition.x > gameObject.transform.position.x) {
+            force = -_gravityForce;
+        } else if (_centralPosition.x < gameObject.transform.position.x) {
+            force = _gravityForce;
+        } else {
+            bool isRight = UnityEngine.Random.Range(0, 2) == 1 ? true : false;
+            if (isRight) {
+                force = _gravityForce;
+            } else {
+                force = -_gravityForce;
+            }
+        }
+        _rb.AddForce(new Vector2(force, 0), ForceMode2D.Impulse);
     }
 }
