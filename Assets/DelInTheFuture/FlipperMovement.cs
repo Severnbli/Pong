@@ -9,6 +9,7 @@ public class FlipperMovement : MonoBehaviour
     private HingeJoint2D _hingeJoint2D;
     private JointMotor2D _defaultMotor;
     private JointMotor2D _modifiedMotor;
+    private bool _isActive = true;
 
     void Start()
     {
@@ -29,7 +30,7 @@ public class FlipperMovement : MonoBehaviour
 
     void Update()
     {
-        if (Input.GetKey(_keyName)) {
+        if (Input.GetKey(_keyName) && _isActive) {
             RotateUp();
         } else {
             StartCoroutine(RotateDown());
@@ -52,5 +53,9 @@ public class FlipperMovement : MonoBehaviour
             yield return new WaitUntil(() => _hingeJoint2D.limitState == JointLimitState2D.LowerLimit);
         }
         _hingeJoint2D.motor = _modifiedMotor;
+    }
+
+    public void changeStatus() {
+        _isActive = !_isActive;
     }
 }

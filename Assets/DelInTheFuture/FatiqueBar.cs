@@ -1,36 +1,98 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class FatiqueBar : MonoBehaviour
 {
-    [SerializeField] private float _staminaAmount = 100.0f;
-    [SerializeField] private float _fatiqueAmount = 1.0f;
-    private float _nowFatigueAmount = 0;
+    [SerializeField] private int _staminaAmount = 4;
+    [SerializeField] private int _fatiqueAmount = 1;
+    [SerializeField] private Material _defaultMaterial;
+    [SerializeField] private Material _flickerMaterial;
+    private int _nowFatigueAmount = 0;
     private Image _barImage;
+    private bool _isPlayAnimation = false;
+    private String _keyName;
 
     void Start()
     {
         _barImage = GetComponent<Image>();
+        StartCoroutine(stamina());
+        
+        if (gameObject.tag == "RightFlipper") {
+            _keyName = GameManager.getRightPlayerKey();
+        } else if (gameObject.tag == "LeftFlipper") {
+            _keyName = GameManager.getLeftPlayerKey();
+        }
     }
 
-    void FixedUpdate()
+    void Update()
     {
-        if (Input.GetKey(GameManager.getLeftPlayerKey())) {
-            if (_nowFatigueAmount < _staminaAmount) {
+        if (!_isPlayAnimation) {
+            prepareUpdate();
+        }
+
+        _barImage.fillAmount = (float) (_staminaAmount - _nowFatigueAmount) / _staminaAmount;
+    }
+
+    private void prepareUpdate() {
+
+        if (Input.GetKeyDown(_keyName)) {
+            fatique();
+        }
+
+        if (_nowFatigueAmount >= _staminaAmount) {
+            GameObject[] gameObjects = GameObject.FindGameObjectsWithTag(gameObject.tag);
+            
+            foreach (GameObject findObject in gameObjects) {
+                SpriteRenderer spriteRenderer = findObject.GetComponent<SpriteRenderer>();
+                FlipperMovement flipperMovement = findObject.GetComponent<FlipperMovement>();
+                
+                if (spriteRenderer && flipperMovement) {
+                    StartCoroutine(flicker(spriteRenderer, flipperMovement));
+                }
+            }
+        }
+    }
+
+    private void fatique() {
+        if (_nowFatigueAmount < _staminaAmount) {
                 _nowFatigueAmount += _fatiqueAmount;
             }
-        } else {
+    }
+
+    private IEnumerator stamina() {
+        while (true) {
+            yield return new WaitForSeconds(2.0f);
             if (_nowFatigueAmount > 0) {
                 _nowFatigueAmount -= _fatiqueAmount;
             }
         }
+    }
 
-        _nowFatigueAmount = Mathf.Clamp(_nowFatigueAmount, 0, _staminaAmount);
+    private IEnumerator flicker(SpriteRenderer spriteRenderer, FlipperMovement flipperMovement) {
+        _isPlayAnimation = true;
+        flipperMovement.changeStatus();
 
-        if (_nowFatigueAmount > 0) {
-            _barImage.fillAmount = (_staminaAmount - _nowFatigueAmount) / _staminaAmount;
-        } else {
-            _barImage.fillAmount = 1;
-        }
+        spriteRenderer.material = _flickerMaterial;
+        yield return new WaitForSeconds(.8f);
+        spriteRenderer.material = _defaultMaterial;
+        yield return new WaitForSeconds(.8f);
+        spriteRenderer.material = _flickerMaterial;
+        yield return new WaitForSeconds(.8f);
+        spriteRenderer.material = _defaultMaterial;
+        yield return new WaitForSeconds(.8f);
+        spriteRenderer.material = _flickerMaterial;
+        yield return new WaitForSeconds(.8f);
+        spriteRenderer.material = _defaultMaterial;
+        yield return new WaitForSeconds(.8f);
+        spriteRenderer.material = _flickerMaterial;
+        yield return new WaitForSeconds(.8f);
+        spriteRenderer.material = _defaultMaterial;
+
+        _isPlayAnimation = false;
+        flipperMovement.changeStatus();
     }
 }
