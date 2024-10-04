@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
+    [SerializeField] private static String _leftPlayerKey = "space";
+    [SerializeField] private static String _rightPlayerKey = "enter";
     [SerializeField] private TextMeshProUGUI _scoreBoard;
     [SerializeField] private TextMeshProUGUI _endScreenText;
     [SerializeField] private GameObject _endScreen;
@@ -39,5 +41,13 @@ public class GameManager : MonoBehaviour
 
     public static void incrementLeftCounter() {
         _leftCounter++;
+    }
+
+    public static String getLeftPlayerKey() {
+        return _leftPlayerKey;
+    }
+
+    public static String getRightPlayerKey() {
+        return _rightPlayerKey;
     }
 }
