@@ -1,15 +1,14 @@
-using System;
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class FlipperMovement : MonoBehaviour
 {
-    private String _keyName;
     private HingeJoint2D _hingeJoint2D;
     private JointMotor2D _defaultMotor;
     private JointMotor2D _modifiedMotor;
+
     private bool _isActive = true;
+    private string _keyName;
 
     void Start()
     {
@@ -30,10 +29,10 @@ public class FlipperMovement : MonoBehaviour
 
     void Update()
     {
-        if (Input.GetKey(_keyName) && _isActive) {
+        if (Input.GetKeyDown(_keyName) && _isActive) {
             RotateUp();
-        } else {
-            StartCoroutine(RotateDown());
+        } else if (Input.GetKeyUp(_keyName)) {
+            RotateDown();
         }
     }
 
@@ -42,16 +41,8 @@ public class FlipperMovement : MonoBehaviour
         _hingeJoint2D.motor = _defaultMotor;
     }
 
-    private IEnumerator RotateDown()
+    private void RotateDown()
     {
-        if (_hingeJoint2D.limits.max > 0)
-        {
-            yield return new WaitUntil(() => _hingeJoint2D.limitState == JointLimitState2D.UpperLimit);
-        }
-        else
-        {
-            yield return new WaitUntil(() => _hingeJoint2D.limitState == JointLimitState2D.LowerLimit);
-        }
         _hingeJoint2D.motor = _modifiedMotor;
     }
 

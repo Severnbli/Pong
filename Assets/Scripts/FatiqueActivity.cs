@@ -1,24 +1,20 @@
-using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
-using UnityEngine.UI;
 
-public class FatiqueBar : MonoBehaviour
+public class FatiqueActivity : MonoBehaviour
 {
-    [SerializeField] private int _staminaAmount = 4;
-    [SerializeField] private int _fatiqueAmount = 1;
-    [SerializeField] private Material _defaultMaterial;
-    [SerializeField] private Material _flickerMaterial;
+    [SerializeField] private GameObject _flipperManager;
+    private Material _defaultMaterial;
+    private Material _flickerMaterial;
+
+    private int _staminaAmount;
+    private int _fatiqueAmount;
     private int _nowFatigueAmount = 0;
-    private Image _barImage;
     private bool _isPlayAnimation = false;
-    private String _keyName;
+    private string _keyName;
 
     void Start()
     {
-        _barImage = GetComponent<Image>();
         StartCoroutine(stamina());
         
         if (gameObject.tag == "RightFlipper") {
@@ -26,6 +22,13 @@ public class FatiqueBar : MonoBehaviour
         } else if (gameObject.tag == "LeftFlipper") {
             _keyName = GameManager.getLeftPlayerKey();
         }
+
+        FatiqueManager fatiqueManager = _flipperManager.GetComponent<FatiqueManager>();
+
+        _defaultMaterial = fatiqueManager.DefaultMaterial;
+        _flickerMaterial = fatiqueManager.FlickerMaterial;
+        _staminaAmount = fatiqueManager.StaminaAmount;
+        _fatiqueAmount = fatiqueManager.FatiqueAmount;
     }
 
     void Update()
@@ -33,12 +36,9 @@ public class FatiqueBar : MonoBehaviour
         if (!_isPlayAnimation) {
             prepareUpdate();
         }
-
-        _barImage.fillAmount = (float) (_staminaAmount - _nowFatigueAmount) / _staminaAmount;
     }
 
     private void prepareUpdate() {
-
         if (Input.GetKeyDown(_keyName)) {
             fatique();
         }

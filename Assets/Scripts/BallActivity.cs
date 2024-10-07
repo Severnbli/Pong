@@ -11,12 +11,20 @@ public class BallActivity : MonoBehaviour
     {
         _rb = GetComponent<Rigidbody2D>();
         
-        GameObject centralElement = GameObject.FindWithTag("CentralElement");
-        if (centralElement) {
-            _centralPosition = centralElement.transform.position;
-        } else {
-            _centralPosition = new Vector3();
-        }
+        GameObject[] centralElements = GameObject.FindGameObjectsWithTag("CentralElement");
+
+        if (centralElements.Length > 0)
+        {
+            int randomIndex = Random.Range(0, centralElements.Length);
+            
+            GameObject centralElement = centralElements[randomIndex];
+
+            if (centralElement) {
+                _centralPosition = centralElement.transform.position;
+            } else {
+                _centralPosition = new Vector3();
+            }
+        } 
     }
 
     void OnCollisionEnter2D(Collision2D collision) {
@@ -25,10 +33,10 @@ public class BallActivity : MonoBehaviour
         }
         if (collision.gameObject.name == "LeftBorder") {
             gameObject.transform.position = _centralPosition;
-            GameManager.incrementLeftCounter();
+           // GameManager.incrementLeftCounter();
         } else if (collision.gameObject.name == "RightBorder") {
             gameObject.transform.position = _centralPosition;
-            GameManager.incrementRightCounter();
+          //  GameManager.incrementRightCounter();
         }
 
         Vector2 collisionNormal = collision.GetContact(0).normal;
@@ -46,13 +54,13 @@ public class BallActivity : MonoBehaviour
     }
 
     void FixedUpdate() {
-        float force = 0.0f;
+        float force;
         if (_centralPosition.x > gameObject.transform.position.x) {
             force = -_gravityForce;
         } else if (_centralPosition.x < gameObject.transform.position.x) {
             force = _gravityForce;
         } else {
-            bool isRight = UnityEngine.Random.Range(0, 2) == 1 ? true : false;
+            bool isRight = Random.Range(0, 2) == 1 ? true : false;
             if (isRight) {
                 force = _gravityForce;
             } else {
