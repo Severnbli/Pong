@@ -6,41 +6,41 @@ public class BallActivity : MonoBehaviour
     [SerializeField] private float _gravityForce = 1f;
     private Rigidbody2D _rb;
     private Vector3 _centralPosition;
+    private static bool _isActive = true;
 
     void Start()
     {
         _rb = GetComponent<Rigidbody2D>();
+        _centralPosition = BallManager.FindNewCentralPosition();
     }
 
     void OnCollisionEnter2D(Collision2D collision) {
-        if (collision.gameObject.tag.Contains("Flipper")) {
-            Rigidbody2D rigidbody = gameObject.GetComponent<Rigidbody2D>();
-
-            if (rigidbody) {
-                BallManager.ReSpawnRandBallInTheSamePosition(rigidbody.angularVelocity, rigidbody.velocity, gameObject.transform.position);
+        if (_isActive) {
+            if (collision.gameObject.tag == "Trigger") {
+            LevelManager.ReSpawnRandBallInTheSamePosition(gameObject);
             }
-        }
-        if (collision.gameObject.name == "LeftPlayerHittingZone") {
-            BallManager.SpawnRandBall();
-            LevelManager.incrementLeftCounter();
-           
-        } else if (collision.gameObject.name == "RightPlayerHittingZone") {
-            BallManager.SpawnRandBall();
-            LevelManager.incrementRightCounter();
-        }
+            if (collision.gameObject.name == "LeftPlayerHittingZone") {
+                LevelManager.SpawnRandBall();
+                LevelManager.incrementLeftCounter();
+            
+            } else if (collision.gameObject.name == "RightPlayerHittingZone") {
+                LevelManager.SpawnRandBall();
+                LevelManager.incrementRightCounter();
+                }
 
-        Vector2 collisionNormal = collision.GetContact(0).normal;
-        Vector2 ballVelocity = _rb.velocity;
-        float angle = Vector2.SignedAngle(ballVelocity, collisionNormal);
+            Vector2 collisionNormal = collision.GetContact(0).normal;
+            Vector2 ballVelocity = _rb.velocity;
+            float angle = Vector2.SignedAngle(ballVelocity, collisionNormal);
 
-        if (angle > 0)
-        {
-            _rb.angularVelocity = -_rotationSpeed;
-        }
-        else
-        {
-            _rb.angularVelocity = _rotationSpeed;
-        }
+            if (angle > 0)
+            {
+                _rb.angularVelocity = -_rotationSpeed;
+            }
+            else
+            {
+                _rb.angularVelocity = _rotationSpeed;
+            }
+            }
     }
 
     void FixedUpdate() {
@@ -58,5 +58,9 @@ public class BallActivity : MonoBehaviour
             }
         }
         _rb.AddForce(new Vector2(force, 0), ForceMode2D.Impulse);
+    }
+
+    public static void SetActive(bool isActive) {
+        _isActive = isActive;
     }
 }

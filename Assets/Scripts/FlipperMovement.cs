@@ -3,6 +3,8 @@ using UnityEngine;
 
 public class FlipperMovement : MonoBehaviour
 {
+    [SerializeField] AudioSource _hitSound;
+
     private HingeJoint2D _hingeJoint2D;
     private JointMotor2D _defaultMotor;
     private JointMotor2D _modifiedMotor;
@@ -25,6 +27,12 @@ public class FlipperMovement : MonoBehaviour
         _modifiedMotor.motorSpeed = - _modifiedMotor.motorSpeed;
 
         _hingeJoint2D.motor = _modifiedMotor;
+    }
+
+    void OnCollisionEnter2D(Collision2D collision2D) {
+        if (collision2D.gameObject.tag == "Ball") {
+            _hitSound.Play();
+        }
     }
 
     void Update()
