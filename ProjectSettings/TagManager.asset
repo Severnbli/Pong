@@ -4,10 +4,10 @@
 TagManager:
   serializedVersion: 2
   tags:
-  - EndGameScreen
   - CentralElement
   - RightFlipper
   - LeftFlipper
+  - Ball
   layers:
   - Default
   - TransparentFX

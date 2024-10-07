@@ -10,24 +10,22 @@ public class BallActivity : MonoBehaviour
     void Start()
     {
         _rb = GetComponent<Rigidbody2D>();
-        
-        FindNewCentralPosition();
-
-        gameObject.transform.position = _centralPosition;
     }
 
     void OnCollisionEnter2D(Collision2D collision) {
         if (collision.gameObject.tag.Contains("Flipper")) {
-            Debug.Log("Hit a ball! " + Time.realtimeSinceStartup);
+            Rigidbody2D rigidbody = gameObject.GetComponent<Rigidbody2D>();
+
+            if (rigidbody) {
+                BallManager.ReSpawnRandBallInTheSamePosition(rigidbody.angularVelocity, rigidbody.velocity, gameObject.transform.position);
+            }
         }
         if (collision.gameObject.name == "LeftPlayerHittingZone") {
-            gameObject.transform.position = _centralPosition;
-            FindNewCentralPosition();
+            BallManager.SpawnRandBall();
             LevelManager.incrementLeftCounter();
            
         } else if (collision.gameObject.name == "RightPlayerHittingZone") {
-            gameObject.transform.position = _centralPosition;
-            FindNewCentralPosition();
+            BallManager.SpawnRandBall();
             LevelManager.incrementRightCounter();
         }
 
@@ -60,22 +58,5 @@ public class BallActivity : MonoBehaviour
             }
         }
         _rb.AddForce(new Vector2(force, 0), ForceMode2D.Impulse);
-    }
-
-    private void FindNewCentralPosition() {
-        GameObject[] centralElements = GameObject.FindGameObjectsWithTag("CentralElement");
-
-        if (centralElements.Length > 0)
-        {
-            int randomIndex = Random.Range(0, centralElements.Length);
-            
-            GameObject centralElement = centralElements[randomIndex];
-
-            if (centralElement) {
-                _centralPosition = centralElement.transform.position;
-            } else {
-                _centralPosition = new Vector3();
-            }
-        } 
     }
 }
