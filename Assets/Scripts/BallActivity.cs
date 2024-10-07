@@ -2,8 +2,8 @@ using UnityEngine;
 
 public class BallActivity : MonoBehaviour
 {
-    [SerializeField] private float _rotationSpeed = 20.0f;
-    [SerializeField] private float _gravityForce = 10.0f;
+    [SerializeField] private float _rotationSpeed = 20f;
+    [SerializeField] private float _gravityForce = 1f;
     private Rigidbody2D _rb;
     private Vector3 _centralPosition;
 
@@ -11,32 +11,24 @@ public class BallActivity : MonoBehaviour
     {
         _rb = GetComponent<Rigidbody2D>();
         
-        GameObject[] centralElements = GameObject.FindGameObjectsWithTag("CentralElement");
+        FindNewCentralPosition();
 
-        if (centralElements.Length > 0)
-        {
-            int randomIndex = Random.Range(0, centralElements.Length);
-            
-            GameObject centralElement = centralElements[randomIndex];
-
-            if (centralElement) {
-                _centralPosition = centralElement.transform.position;
-            } else {
-                _centralPosition = new Vector3();
-            }
-        } 
+        gameObject.transform.position = _centralPosition;
     }
 
     void OnCollisionEnter2D(Collision2D collision) {
-        if (collision.gameObject.tag == "Flipper") {
+        if (collision.gameObject.tag.Contains("Flipper")) {
             Debug.Log("Hit a ball! " + Time.realtimeSinceStartup);
         }
-        if (collision.gameObject.name == "LeftBorder") {
+        if (collision.gameObject.name == "LeftPlayerHittingZone") {
             gameObject.transform.position = _centralPosition;
-           // GameManager.incrementLeftCounter();
-        } else if (collision.gameObject.name == "RightBorder") {
+            FindNewCentralPosition();
+            LevelManager.incrementLeftCounter();
+           
+        } else if (collision.gameObject.name == "RightPlayerHittingZone") {
             gameObject.transform.position = _centralPosition;
-          //  GameManager.incrementRightCounter();
+            FindNewCentralPosition();
+            LevelManager.incrementRightCounter();
         }
 
         Vector2 collisionNormal = collision.GetContact(0).normal;
@@ -68,5 +60,22 @@ public class BallActivity : MonoBehaviour
             }
         }
         _rb.AddForce(new Vector2(force, 0), ForceMode2D.Impulse);
+    }
+
+    private void FindNewCentralPosition() {
+        GameObject[] centralElements = GameObject.FindGameObjectsWithTag("CentralElement");
+
+        if (centralElements.Length > 0)
+        {
+            int randomIndex = Random.Range(0, centralElements.Length);
+            
+            GameObject centralElement = centralElements[randomIndex];
+
+            if (centralElement) {
+                _centralPosition = centralElement.transform.position;
+            } else {
+                _centralPosition = new Vector3();
+            }
+        } 
     }
 }
